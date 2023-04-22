@@ -1,7 +1,6 @@
 # Markov_Chain_Chord_Progressions
 
-As formula-based music can be, there is also randomness involved. The possibility of any note is equally likely so
-when a note is chosen next, the previous note does not influence the proababiltiy for what note is chosen after.
+As formula-based music can be, there is also randomness involved. The possibility of any note is equally likely.
 The Markov Property can be applied to music in the sense that while a note is random, it may depend only on the current note being played in a sequence. 
 
 For this project, I chose to compare two of my favorite artists by their chord progression usage.
