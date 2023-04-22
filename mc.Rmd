@@ -1,0 +1,204 @@
+---
+title: "chord.chain"
+author: "LA"
+date: "2022-10-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## MARKOV CHAIN - CHORD PROGRESSION
+Music can be very complex. A song can consist of a series of chords, harmonies, melodies, and vocals.
+Chord progressions are often written in roman numerals, where upper case numerals are for major chords, and lower case numerals are for minor chords. 
+I want to look at the chord progression sequences of songs, as well as the distribution of these chord progressions using markov chains Chord progressions.
+
+Chords are labeled 1-7 (I ii iii IV V vi vii) . 
+
+I will analyze two songs by one artist and compare the probability matrices with two songs by a different artist. They should be different
+```{r}
+library(markovchain)
+library(dplyr)
+
+# SONGS AND THEIR KEY CHORD PROGRESSIONS (more songs will be added)
+
+chords <- c("I", "ii", "iii", "IV", "V", "vi", "vii")
+
+#chords <- c("I", "i", "II", "ii", "III", "iii", "IV","IV7", "iv", "V","v","VI", "vi", "VII", "vii", "vii7")
+
+#chords <- c("I", "ii", "iii", "IV", "IV7" ,"V", "vi", "vii", "vii7")
+
+BadRomance <- c("I", "Vii", "vi", "IV", "V", "I")
+Dreams <- c("vi","V", "IV", "V", "vi", "V", "IV")
+Hallelujah <- c("V","iii", "V", "iii", "I", "ii", "V")
+ForeverYoung <- c("vi", "I", "vi", "I", "IV", "vi", "V", "IV", "vi", "V", "IV", "vi","V", "IV", "vi", "V", "i","VI")
+SevenWonders <- c("IV","I","vi","V","IV","I","vi","V","IV","V","vi","IV",
+                  "I", "V", "I", "V", "I", "V", "IV", "V")
+
+#FINDING PROBABILITIES 
+
+songs <- list(BadRomance,Dreams,Hallelujah)
+songs.MC <- markovchainFit(data=songs)
+
+songs.MC
+
+##TRANSITION/MARKOV CHAIN APPLICATION
+
+chords <- c("I", "ii", "iii", "IV", "V", "vi", "vii")
+chord.transition <- matrix(c(0,0,0,0.5,0.5,0,0,
+                             0,0,1,0,0,0,0,
+                             0.1666667,0.3333333,0,0,0,0.3333333,0.1666667,
+                             0,0,0,0,0,0,1,
+                             0,0,1,0,0,0,0,
+                             0.5,0,0.5,0,0,0,0,
+                             0,0.3333333,0.6666667,0,0,0,0), nrow=7, ncol=7, byrow=TRUE)
+
+MC.chords <- new("markovchain", states=chords, byrow=TRUE,transitionMatrix=chord.transition, name="Chord Progression")
+
+class(MC.chords)
+MC.chords^3
+
+PWF <- markovchainFit(PlayingWithFire,sanitize=TRUE, possibleStates = possible.chords)
+
+LG <- markovchainFit(LovesickGirls,sanitize=TRUE, possibleStates = possible.chords)
+
+PWF
+LG
+
+
+
+#Creating Matrix
+
+Blackpink <- c(PlayingWithFire,LovesickGirls)
+
+BP.chordcounts <- createSequenceMatrix(Blackpink,toRowProbs=FALSE,sanitize=FALSE, possibleStates = possible.chords)
+
+BP.chordcounts
+
+BP.chordprob <- createSequenceMatrix(Blackpink,toRowProbs=TRUE,sanitize=FALSE, possibleStates = possible.chords)
+
+BP.chordprob
+
+#Transition Probability Matrix 
+
+BP.TM <- markovchainFit(Blackpink,sanitize=TRUE, possibleStates = possible.chords)
+
+BP.TM
+
+```
+
+
+
+
+I will be comparing two songs from the girl-group BLACKPINK, and two songs from the band Fleetwood Mac
+```{r}
+
+library(markovchain)
+
+#Minor chords are lowercase
+#Major chords are uppercase
+
+possible.chords <- c("I","i","II", "ii", "III","iii", "IV","iv", "V", "v","VI", "vi", "VII","vii")
+
+
+#BLACKPINK
+
+PlayingWithFire <-c("vi","I","IV","V",
+                    "vi","I","IV","V",
+                    "vi","I","IV","V",
+                    "vi","V","I","vi","V",
+                    "vi","I","IV","V",
+                    "vi","I","IV","V",
+                    "vi","V","I","vi","V",
+                    "vi","I","IV","V",
+                    "vi","I","IV","V",
+                    "vi","I","IV","V",
+                    "vi","vi","I","IV","v",
+                    "vi","vi","I",
+                    "vi","I","IV","V",
+                    "vi","V","I","vi","V",
+                    "vi","I","IV","V",
+                    "vi","V","I","vi","V",
+                    "vi","I","IV","V",
+                    "vi","V","I","vi","V",
+                    "vi","I","IV","V",
+                    "vi","V","I","vi",
+                    "IV", "V", "vi", "iii","III", "IV", "V", "vi","iii",
+                    "IV","V","vi","V","I",
+                     "IV","V","vi","V","I",
+                     "IV","V","vi","V","I",
+                     "IV","V") 
+
+LovesickGirls <- c("vi", "I", "IV", "vi", "I", "IV", "V", "V", "IV", "V", "vi", "I", "IV", "V", "vi", "I", "IV", "V", "vi", "I", "IV", "V", "vi", "vi", "V", "I", "IV", "vi", "V", "I", "IV", "vi", "V", "I", "IV", "vi", "V", "I", "IV", "vi", "V", "I", "VI", "vi", "V", "I", "IV", "vi", "V", "I", "IV", "vi","V", "I", "IV", "IV","V","vii","vi","IV","V","vi","vi", "vi","V","I","IV","vi", "V", "I", "IV","vi","V","I","IV","vi","V","I","IV","vi","V","I","IV","vi","V","I","IV", "vi", "V", "I", "IV", "vi", "V", "I", "IV")
+
+#Creating Matrix
+
+Blackpink <- c(PlayingWithFire,LovesickGirls)
+
+BP.chordcounts <- createSequenceMatrix(Blackpink,toRowProbs=FALSE,sanitize=FALSE, possibleStates = possible.chords)
+
+BP.chordcounts
+
+BP.chordprob <- createSequenceMatrix(Blackpink,toRowProbs=TRUE,sanitize=FALSE, possibleStates = possible.chords)
+
+BP.chordprob
+
+#Transition Probability Matrix 
+
+BP.TM <- markovchainFit(Blackpink,sanitize=TRUE, possibleStates = possible.chords)
+
+BP.TM
+
+
+#FLEETWOOD MAC
+
+Landslide <- c("I","V","vi","V","I","V","vi", "V","I","V","vi","V","I","V","vi","V","I","V","vi","V","I","V","vi","V","V", "I", "V","vi","IV","I","ii","V","I","V","vi","IV","I","ii","I","V","vi","V","I","V","vi", "V","I","V","vi","V","I","I","V","vi","V","I","V","vi","V","I","V","vi","V","V","I", "V", "vi","IV","I","ii","V","I","V","vi","IV","I","ii","I")
+
+Dreams <- c("vi","vii","vi","vii","vi","vii","vi","vii",
+            "vi","vii","vi","vii","vi","vii","vi","vii","vi","vii","vi","vii",
+            "vi","vii","vi","vii","vi","vii","vi","vii","vi","vii","vi","vii",
+            "vi","V","vi","V","vi","V","vi","V","vi","V","vi","V","vi","V","vi","V")
+
+#Creating Matrix
+
+FleetwoodMac <- c(Landslide,Dreams)
+
+FM.chordcounts <- createSequenceMatrix(FleetwoodMac,toRowProbs = FALSE, sanitize=FALSE, possibleStates= possible.chords)
+
+FM.chordcounts
+
+FM.chordprob <- createSequenceMatrix(FleetwoodMac,toRowProbs=TRUE,sanitize=FALSE, possibleStates = possible.chords)
+
+FM.chordprob
+
+#Transition Probability Matrix
+
+FM.TM <- markovchainFit(FleetwoodMac,sanitize=TRUE, possibleStates = possible.chords)
+
+FM.TM
+
+
+
+
+#Blackpink at a Glance: Looking at both songs separately
+
+PWF <- markovchainFit(PlayingWithFire,sanitize=TRUE, possibleStates = possible.chords)
+
+LG <- markovchainFit(LovesickGirls,sanitize=TRUE, possibleStates = possible.chords)
+
+PWF
+LG
+
+
+L <- markovchainFit(Landslide,sanitize=TRUE, possibleStates = possible.chords)
+
+D <- markovchainFit(Dreams,sanitize=TRUE, possibleStates = possible.chords)
+
+L 
+D
+
+
+```
+
